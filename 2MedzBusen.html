@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="lt">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Šilumos Perdavimo Simuliacija</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f0f0f0;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        #valdikliai {
+            margin: 15px;
+        }
+
+        canvas {
+            display: block;
+            margin: auto;
+        }
+
+        details {
+            max-width: 800px;
+            margin: 10px auto;
+            text-align: left;
+            padding: 10px;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Šilumos Perdavimo Simuliacija</h2>
+
+    <div id="valdikliai">
+        <label for="temp1">Kūno A pradinė temperatūra (°C):</label>
+        <input id="temp1" type="number" value="80" style="width:60px" />
+        <label for="temp2">Kūno B pradinė temperatūra (°C):</label>
+        <input id="temp2" type="number" value="20" style="width:60px" />
+        <button onclick="startSimulation()">Pradėti simuliaciją</button>
+        <button onclick="stopSimulation()">Nutraukti</button>
+    </div>
+
+    <script>
+        let temperatureA = 80;
+        let temperatureB = 20;
+        let running = false;
+
+        function startSimulation() {
+            temperatureA = parseFloat(document.getElementById('temp1').value);
+            temperatureB = parseFloat(document.getElementById('temp2').value);
+            running = true;
+        }
+
+        function stopSimulation() {
+            running = false;
+        }
+
+        function setup() {
+            createCanvas(600, 300);
+        }
+
+        function draw() {
+            background(240);
+            fill(0);
+            textSize(16);
+            textAlign(CENTER);
+            text("Šilumos Perdavimo Simuliacija", width / 2, 30);
+
+            // Kūnų atvaizdavimas
+            fill(lerpColor(color(0, 0, 255), color(255, 0, 0), temperatureA / 100));
+            rect(150, 100, 100, 100);
+            fill(lerpColor(color(0, 0, 255), color(255, 0, 0), temperatureB / 100));
+            rect(350, 100, 100, 100);
+
+            fill(0);
+            text(`A temperatūra: ${temperatureA.toFixed(1)}°C`, 200, 220);
+            text(`B temperatūra: ${temperatureB.toFixed(1)}°C`, 400, 220);
+
+            if (running) {
+                let avg = (temperatureA + temperatureB) / 2;
+                temperatureA += (avg - temperatureA) * 0.01;
+                temperatureB += (avg - temperatureB) * 0.01;
+
+                if (Math.abs(temperatureA - temperatureB) < 0.1) {
+                    running = false;
+                }
+            }
+        }
+    </script>
+
+    <details>
+        <summary>Paaiškinimas</summary>
+        <p>
+            Ši simuliacija parodo šilumos mainus tarp dviejų kūnų. Kūnai pradeda su skirtingomis temperatūromis.
+            Bėgant laikui, jų temperatūros išsilygina dėl šilumos perdavimo.
+        </p>
+        <ul>
+            <li>Raudona spalva reiškia aukštesnę temperatūrą</li>
+            <li>Mėlyna spalva reiškia žemesnę temperatūrą</li>
+            <li>Temperatūros lyginasi tol, kol pasiekia pusiausvyrą. Esant dideliam temperatūrų skirtumui temperatūrų
+                pokytis greitesnis, nei esant mažesniam temperatūrų skirtumui.</li>
+        </ul>
+    </details>
+
+    <details>
+        <summary>Daugiau informacijos</summary>
+        <p>Daugiau apie šilumos perdavimą galite sužinoti čia:</p>
+        <ul>
+            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/31551/361" target="_blank">Eduka: Vidinė
+                    energija</a></li>
+            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/1541/20?teachingPackageId=20&teachingGroupCreation=0&lesson=1258&subtype=tasks&pageFlip=7"
+                    target="_blank">Eduka: Šiluminis judėjimas</a></li>
+        </ul>
+    </details>
+</body>
+
+</html>
