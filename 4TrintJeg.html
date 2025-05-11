@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="lt">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Trinties jėgų simuliacija</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f5f5f5;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid #ccc;
+        }
+
+        #valdikliai {
+            margin: 10px auto;
+            width: 90%;
+            max-width: 700px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        button {
+            margin-top: 10px;
+            margin-right: 5px;
+        }
+
+        #paaiskinimas,
+        #daugiauInfo {
+            background: #eef;
+            padding: 10px;
+            margin: 10px auto;
+            max-width: 700px;
+            border: 1px solid #ccd;
+            display: none;
+        }
+
+        a {
+            color: #00f;
+            text-decoration: underline;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
+</head>
+
+<body>
+
+    <h2>Trinties jėgų simuliacija</h2>
+    <p>Pamatykite kaip paviršiai ir gravitacija veikia judėjimą.</p>
+
+    <div id="valdikliai">
+        <!-- Valdikliai: jėga, gravitacija, medžiagos pasirinkimas, trinties reikšmė -->
+        <label>Stūmimo jėga: <span id="jegaReiksme">50</span> N
+            <input type="range" id="jegaSlinkiklis" min="10" max="200" value="50">
+        </label>
+
+        <label>Gravitacija (g): <span id="gReiksme">9.8</span> m/s²
+            <input type="range" id="gSlinkiklis" min="1" max="25" step="0.1" value="9.8">
+        </label>
+
+        <label> Paviršiaus medžiaga:
+            <select id="medziagaPasirinkimas">
+                <option value="Ledas:0.05">Ledas (μ = 0.05)</option>
+                <option value="Medis:0.3">Medis (μ = 0.3)</option>
+                <option value="Guma:0.8">Guma (μ = 0.8)</option>
+            </select>
+        </label>
+
+        <label>Pasirenkama bloko trintis (blokas 2): μ = <span id="pasirenkamaTrintisVal">0.3</span>
+            <input type="range" id="pasirenkamaTrintis" min="0" max="1" step="0.01" value="0.3">
+        </label>
+
+        <button onclick="atstatytiBlokus()">Iš naujo</button>
+        <button onclick="rodytiInfo()">Rodyti / Slėpti paaiškinimą</button>
+        <button onclick="rodytiDaugiau()">Rodyti / Slėpti šaltinius</button>
+    </div>
+
+    <div id="paaiskinimas">
+        <h3>Paaiškinimas ir formulės</h3>
+        <p>Ši simuliacija rodo, kaip <strong>trintis</strong> ir <strong>grynoji jėga</strong> veikia judėjimą.</p>
+
+        <p><strong>Trinties jėga:</strong> <code>F<sub>trintis</sub> = μ × m × g</code></p>
+        <p>
+            <code>μ</code> – trinties koeficientas<br>
+            <code>m</code> – masė (kg)<br>
+            <code>g</code> – laisvojo kritimo pagreitis (m/s²)
+        </p>
+
+        <p><strong>Grynoji jėga:</strong> <code>F<sub>grynoji</sub> = F<sub>stumti</sub> − F<sub>trintis</sub></code>
+        </p>
+        <p>
+            <code>F<sub>stumti</sub></code> – taikoma stūmimo jėga (N)<br>
+            <code>F<sub>trintis</sub></code> – trinties jėga (N)
+        </p>
+
+        <p><strong>Pagreitis:</strong> <code>a = F<sub>grynoji</sub> / m</code></p>
+        <p>
+            <code>a</code> – pagreitis (m/s²)<br>
+            <code>F<sub>grynoji</sub></code> – grynoji jėga (N)<br>
+            <code>m</code> – masė (kg)
+        </p>
+    </div>
+
+    <div id="daugiauInfo">
+        <h3>Daugiau informacijos</h3>
+        <ul>
+            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/30010/337?teachingPackageId=337&teachingGroupCreation=0&lesson=32609&subtype=tasks&pageFlip=140"
+                    target="_blank">Eduka: Trinties jėga</a></li>
+            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/30010/337?teachingPackageId=337&teachingGroupCreation=0&lesson=32609&subtype=tasks&pageFlip=102"
+                    target="_blank">Eduka: Jėgos</a>
+            </li>
+        </ul>
+    </div>
+
+    <script>
+        let medzDefault = { pavadinimas: "Medis", trintis: 0.3, spalva: "#deb887" };
+        let pasirenkamaTrintis = 0.3;
+        let treciaMedziaga = { pavadinimas: "Plienas", trintis: 0.6, spalva: "#888" };
+
+        let g = 9.8;
+        let stumimoJega = 50;
+        let blokai = [];
+        let zemesY, maxX;
+
+        function setup() {
+            createCanvas(900, 370);
+            zemesY = height - 50;
+            maxX = width - 100;
+
+            // Prisirišti slinkiklius prie įvykių
+            document.getElementById('jegaSlinkiklis').addEventListener('input', () => {
+                stumimoJega = parseFloat(document.getElementById('jegaSlinkiklis').value);
+                document.getElementById('jegaReiksme').textContent = stumimoJega;
+            });
+
+            document.getElementById('gSlinkiklis').addEventListener('input', () => {
+                g = parseFloat(document.getElementById('gSlinkiklis').value);
+                document.getElementById('gReiksme').textContent = g;
+            });
+
+            document.getElementById('medziagaPasirinkimas').addEventListener('change', () => {
+                let val = document.getElementById('medziagaPasirinkimas').value.split(":");
+                medzDefault.pavadinimas = val[0];
+                medzDefault.trintis = parseFloat(val[1]);
+                medzDefault.spalva = val[0] === "Ledas" ? "#aee" : val[0] === "Guma" ? "#222" : "#deb887";
+                atstatytiBlokus();
+            });
+
+            document.getElementById('pasirenkamaTrintis').addEventListener('input', () => {
+                pasirenkamaTrintis = parseFloat(document.getElementById('pasirenkamaTrintis').value);
+                document.getElementById('pasirenkamaTrintisVal').textContent = pasirenkamaTrintis.toFixed(2);
+                blokai[1].trintis = pasirenkamaTrintis;
+            });
+
+            atstatytiBlokus();
+        }
+
+        function draw() {
+            background(255);
+            stroke(0);
+            line(0, zemesY, width, zemesY);
+
+            for (let blokas of blokai) {
+                blokas.atnaujinti();
+                blokas.pavaizduoti();
+            }
+
+            fill(0);
+            textSize(12);
+            textAlign(LEFT);
+            text(`Stūmimo jėga: ${stumimoJega} N | Gravitacija: ${g} m/s²`, 10, 20);
+        }
+
+        function atstatytiBlokus() {
+            blokai = [];
+            let pradY = zemesY - 60;
+
+            blokai.push(new Blokas(50, pradY, 80, 40, medzDefault.trintis, medzDefault.spalva, medzDefault.pavadinimas));
+            blokai.push(new Blokas(50, pradY - 80, 80, 40, pasirenkamaTrintis, "#faa", "pasirenkama"));
+            blokai.push(new Blokas(50, pradY - 160, 80, 40, treciaMedziaga.trintis, treciaMedziaga.spalva, treciaMedziaga.pavadinimas));
+        }
+
+        function rodytiInfo() {
+            const info = document.getElementById("paaiskinimas");
+            info.style.display = info.style.display === "block" ? "none" : "block";
+        }
+
+        function rodytiDaugiau() {
+            const daugiau = document.getElementById("daugiauInfo");
+            daugiau.style.display = daugiau.style.display === "block" ? "none" : "block";
+        }
+
+        class Blokas {
+            constructor(x, y, plotis, aukstis, trintis, spalva, pavadinimas) {
+                this.x = x;
+                this.y = y;
+                this.plotis = plotis;
+                this.aukstis = aukstis;
+                this.trintis = trintis;
+                this.spalva = spalva;
+                this.pavadinimas = pavadinimas;
+                this.greitisX = 0;
+                this.mase = 10;
+                this.stabdyta = false;
+            }
+
+            atnaujinti() {
+                if (this.stabdyta) return;
+
+                let trintiesJega = this.trintis * this.mase * g;
+                let grynoji = stumimoJega - trintiesJega;
+
+                if (grynoji > 0) {
+                    let a = grynoji / this.mase;
+                    this.greitisX += a * 0.1;
+                    this.greitisX *= 0.98;
+                    this.x += this.greitisX;
+
+                    if (this.greitisX < 0.05 || this.x > maxX) {
+                        this.greitisX = 0;
+                        this.stabdyta = true;
+                    }
+                    if (this.x > maxX) this.x = maxX;
+                } else {
+                    this.stabdyta = true;
+                }
+            }
+
+            pavaizduoti() {
+                fill(this.spalva);
+                rect(this.x, this.y, this.plotis, this.aukstis);
+                fill(0);
+                textSize(12);
+                textAlign(CENTER);
+                text(`${this.pavadinimas} (μ=${this.trintis.toFixed(2)})`, this.x + this.plotis / 2, this.y - 5);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
