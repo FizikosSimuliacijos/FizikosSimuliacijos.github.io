@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Vandens Būsenų Kitimo Simuliacija</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f0f0f0;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        #valdikliai {
+            margin: 15px;
+        }
+
+        canvas {
+            display: block;
+            margin: auto;
+        }
+
+        details {
+            max-width: 800px;
+            margin: 10px auto;
+            text-align: left;
+            padding: 10px;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Vandens Būsenų Kitimo Simuliacija</h2>
+
+    <div id="valdikliai">
+        <label for="pradine_temp">Pradinė temperatūra (°C):</label>
+        <input id="pradine_temp" type="number" value="0" style="width:60px" />
+        <label for="galine_temp">Galinė temperatūra (°C):</label>
+        <input id="galine_temp" type="number" value="120" style="width:60px" />
+        <button onclick="pradetiSimuliacija()">Pradėti simuliaciją</button>
+        <button onclick="nutrauktiSimuliacija()">Nutraukti</button>
+    </div>
+
+    <script>
+        let temperatura = 0;
+        let laikas = 0;
+        let sildoma = false;
+        let temperaturos_istorija = [];
+        let molekules = [];
+        let busena = "kieta";
+        let tiksline_temperatura = 120;
+        let pradine_temperatura = 0;
+        let max_laikas_grafike = 800;
+
+        function pradetiSimuliacija() {
+            let ivestis_pradine = parseFloat(document.getElementById("pradine_temp").value);
+            let ivestis_galine = parseFloat(document.getElementById("galine_temp").value);
+
+            if (isNaN(ivestis_pradine) || isNaN(ivestis_galine) || ivestis_pradine >= ivestis_galine) {
+                alert("Įveskite tinkamą temperatūrų intervalą (pradžia < pabaiga)");
+                return;
+            }
+
+            pradine_temperatura = ivestis_pradine;
+            tiksline_temperatura = ivestis_galine;
+
+            temperatura = pradine_temperatura;
+            laikas = 0;
+            temperaturos_istorija = [];
+            sildoma = true;
+
+            nustatytiBusenaPagalTemperatura();
+            sukurtiMolekules();
+        }
+
+        function nutrauktiSimuliacija() {
+            sildoma = false;
+        }
+
+        function setup() {
+            createCanvas(800, 600);
+            sukurtiMolekules();
+        }
+
+        function draw() {
+            background(255);
+
+            stroke(180);
+            noFill();
+            rect(40, 40, 720, 140); // grafikas
+            rect(200, 240, 400, 320); // molekulių dėžė
+
+            piestiGrafika();
+            piestiUzklausas();
+
+            if (sildoma) {
+                if (temperatura < tiksline_temperatura) {
+                    let pokytis = (tiksline_temperatura - pradine_temperatura) / max_laikas_grafike;
+                    temperatura += pokytis;
+                } else {
+                    sildoma = false;
+                }
+
+                laikas += 1;
+                nustatytiBusenaPagalTemperatura();
+                temperaturos_istorija.push({ x: laikas, y: temperatura });
+            }
+
+            piestiMolekules();
+        }
+
+        function nustatytiBusenaPagalTemperatura() {
+            if (temperatura < 0) busena = "kieta";
+            else if (temperatura >= 0 && temperatura < 100) busena = "skysta";
+            else busena = "dujine";
+        }
+
+        function sukurtiMolekules() {
+            molekules = [];
+            for (let i = 0; i < 30; i++) {
+                molekules.push({
+                    x: random(220, 580),
+                    y: random(260, 540),
+                    dx: random(-1, 1),
+                    dy: random(-1, 1),
+                    dydis: random(8, 14)
+                });
+            }
+        }
+
+        function piestiMolekules() {
+            for (let m of molekules) {
+                if (busena === "kieta") {
+                    m.dx = 0;
+                    m.dy = 0;
+                } else if (busena === "skysta") {
+                    m.x += random(-0.5, 0.5);
+                    m.y += random(-0.5, 0.5);
+                } else {
+                    m.x += m.dx;
+                    m.y += m.dy;
+                    if (m.x < 220 || m.x > 580) m.dx *= -1;
+                    if (m.y < 260 || m.y > 540) m.dy *= -1;
+                }
+
+                fill(100, 150, 255);
+                noStroke();
+                ellipse(m.x, m.y, m.dydis);
+            }
+        }
+
+        function piestiGrafika() {
+            stroke(0);
+            line(50, 180, 750, 180); // x ašis
+            line(50, 50, 50, 180);   // y ašis
+
+            // Temperatūros linija
+            noFill();
+            stroke(255, 0, 0);
+            beginShape();
+            for (let i = 0; i < temperaturos_istorija.length; i++) {
+                let x = map(temperaturos_istorija[i].x, 0, max_laikas_grafike, 50, 750);
+                let yReiksme = constrain(temperaturos_istorija[i].y, pradine_temperatura, tiksline_temperatura);
+                let y = map(yReiksme, pradine_temperatura, tiksline_temperatura, 180, 50);
+                vertex(x, y);
+            }
+            endShape();
+
+            // Y ašies padalos
+            fill(0);
+            noStroke();
+            textSize(10);
+            let zingsnis = Math.ceil((tiksline_temperatura - pradine_temperatura) / 5);
+            for (let t = pradine_temperatura; t <= tiksline_temperatura; t += zingsnis) {
+                let y = map(t, pradine_temperatura, tiksline_temperatura, 180, 50);
+                text(t + "°C", 10, y + 4);
+                stroke(230);
+                line(50, y, 750, y);
+                noStroke();
+            }
+        }
+
+        function piestiUzklausas() {
+            fill(0);
+            textSize(14);
+            text("Temperatūra pagal laiką", 400, 30);
+            textSize(12);
+            text("Dabartinė temperatūra: " + temperatura.toFixed(1) + "°C", 600, 220);
+            text("Būsena: " + busena, 600, 235);
+        }
+    </script>
+
+    <!-- Paaiškinimas -->
+    <details>
+        <summary>Paaiškinimas</summary>
+        <p>
+            Ši simuliacija parodo, kaip vandens dalelės juda kylant temperatūrai. Reguliuodami pradinę ir galutinę
+            temperatūrą galite stebėti raudoną liniją, kuri žymi temperatūros kitimą
+            laikui bėgant.
+        </p>
+        <ul>
+            <li>0°C = tirpimo temperatūra</li>
+            <li>100°C = virimo temperatūra</li>
+        </ul>
+    </details>
+
+    <!-- Daugiau informacijos -->
+    <details>
+        <summary>Daugiau informacijos</summary>
+        <p>Daugiau apie fazių pokyčius galite sužinoti šiuose šaltiniuose:</p>
+        <ul>
+            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/1541/20?teachingPackageId=20&teachingGroupCreation=0&lesson=1258&subtype=tasks&pageFlip=11"
+                    target="_blank">Eduka: Kūnų vidinės energijos kitimo būdai</a></li>
+            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/31551/361?teachingPackageId=361&teachingGroupCreation=0&lesson=34433&subtype=tasks&pageFlip=6"
+                    target="_blank">Eduka: Vidinė energija</a></li>
+        </ul>
+    </details>
+</body>
+
+</html>
