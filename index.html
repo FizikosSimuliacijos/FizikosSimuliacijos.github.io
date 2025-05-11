@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="lt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fizikos Simuliacijos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            background-color: #36393f;
+            color: #dcdddd;
+        }
+
+        h1 {
+            color: #f0f8ff;
+            margin-bottom: 30px;
+        }
+
+        .mygtuku_konteineris {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            background-color: #434b52;
+            color: #fff;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background-color: #5865f2;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        #teksto_laukas {
+            width: 80%;
+            height: 100px;
+            margin-bottom: 25px;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #5865f2;
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: #434b52;
+            color: #dcdddd;
+            text-align: center;
+            display: none;
+        }
+
+        #apie_tekstas {
+            width: 80%;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #5865f2;
+            border-radius: 8px;
+            background-color: #434b52;
+            font-size: 16px;
+            text-align: center;
+            display: none;
+            color: #dcdddd;
+        }
+
+        canvas {
+            border: 1px solid #5865f2;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background-color: #434b52;
+        }
+
+        #piesimo_konteineris {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Fizikos Simuliacijos</h1>
+    <div id="pagrindinis" class="mygtuku_konteineris"></div>
+    <div id="antrinis" class="mygtuku_konteineris"></div>
+    <textarea id="teksto_laukas" style="display:none;" readonly></textarea>
+    <div id="piesimo_konteineris"></div>
+    <div id="apie_tekstas">Ši svetainė skirta interaktyvioms fizikos simuliacijoms. Čia galite rasti įvairių
+        simuliacijų, susijusių su 9 klasės fizikos kursu. Ji sukurta IUPD projektui.</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+
+    <script>
+        const temos = ['Šiluminiai reiškiniai', 'Judėjimas ir jėgos', 'Mechaninis darbas, galia ir energija'];
+
+        // Kiekvienai temai priskiriamos simuliacijos ir jų nuorodos
+        const simuliaciju_duomenys = {
+            'Šiluminiai reiškiniai': [
+                { pavadinimas: 'Vidinės energijos simuliacija', nuoroda: '1VidinEnerg.html' },
+                { pavadinimas: 'Medžiagų būsenos kitimo simuliacija', nuoroda: '2MedzBusen.html' },
+            ],
+            'Judėjimas ir jėgos': [
+                { pavadinimas: 'Mechaninio judėjimo simuliacija', nuoroda: '3mechaninis_judejimas_simuliacija.html' },
+                { pavadinimas: 'Jėgų simuliacija', nuoroda: '4TrintJeg.html' },
+                { pavadinimas: 'Sąveikos dėsnių simuliacija', nuoroda: '5SaveikDesn.html' },
+                { pavadinimas: 'Archimedo jėgos simuliacija', nuoroda: '6Archimed.html' },
+            ],
+            'Mechaninis darbas, galia ir energija': [
+                { pavadinimas: 'Mechaninio darbo ir galios simuliacija 1', nuoroda: 'https://www.google.com' },
+                { pavadinimas: 'Mechaninio darbo ir galios simuliacija 2', nuoroda: 'https://www.youtube.com' },
+                { pavadinimas: 'Mechaninės energijos simuliacija 1', nuoroda: 'https://www.facebook.com' },
+                { pavadinimas: 'Mechaninės energijos simuliacija 2', nuoroda: 'https://www.twitter.com' },
+                { pavadinimas: 'Paprastųjų mechanizmų simuliacija 1', nuoroda: 'https://www.google.com' },
+                { pavadinimas: 'Paprastųjų mechanizmų simuliacija 2', nuoroda: 'https://www.youtube.com' }
+            ]
+        };
+
+        const pagrindinis_div = document.getElementById('pagrindinis');
+        const antrinis_div = document.getElementById('antrinis');
+        const teksto_laukas = document.getElementById('teksto_laukas');
+        const piesimo_konteineris = document.getElementById('piesimo_konteineris');
+        const apie_tekstas_div = document.getElementById('apie_tekstas');
+
+        let aktyvi_simuliacija = null;
+
+        function isvalyti_piesima() {
+            if (aktyvi_simuliacija) {
+                aktyvi_simuliacija.remove();
+                aktyvi_simuliacija = null;
+            }
+            piesimo_konteineris.innerHTML = '';
+        }
+
+        function rodyti_temas() {
+            pagrindinis_div.innerHTML = '';
+            antrinis_div.innerHTML = '';
+            teksto_laukas.style.display = 'none';
+            apie_tekstas_div.style.display = 'none';
+            isvalyti_piesima();
+
+            temos.forEach(tema => {
+                const mygtukas = document.createElement('button');
+                mygtukas.textContent = tema;
+                mygtukas.onclick = () => rodyti_simuliacijas(tema);
+                pagrindinis_div.appendChild(mygtukas);
+            });
+
+            // Sukuriame ir pridedame "Apie šią svetainę" mygtuką paskutinį
+            const apie_mygtukas = document.createElement('button');
+            apie_mygtukas.textContent = 'Apie šią svetainę';
+            apie_mygtukas.onclick = () => {
+                apie_tekstas_div.style.display = 'block';
+                antrinis_div.innerHTML = '';
+                teksto_laukas.style.display = 'none';
+                isvalyti_piesima();
+            };
+            pagrindinis_div.appendChild(apie_mygtukas);
+        }
+
+        function rodyti_simuliacijas(pasirinkta_tema) {
+            antrinis_div.innerHTML = '';
+            teksto_laukas.style.display = 'none';
+            apie_tekstas_div.style.display = 'none';
+            isvalyti_piesima();
+
+            const simuliacijos = simuliaciju_duomenys[pasirinkta_tema];
+
+            simuliacijos.forEach(simuliacija => { // Pakeista iš simuliacijos[indeksas] į simuliacija
+                const mygtukas = document.createElement('button');
+                mygtukas.textContent = simuliacija.pavadinimas;
+                mygtukas.onclick = () => {
+                    window.location.href = simuliacija.nuoroda; // Naudojama simuliacija.nuoroda
+                };
+                antrinis_div.appendChild(mygtukas);
+            });
+        }
+
+        function ikelti_simuliacija(tema, sim_pavadinimas, simuliacijos_numeris) {
+            teksto_laukas.style.display = 'block';
+            teksto_laukas.value = `Dabar peržiūrite: ${sim_pavadinimas}`;
+            apie_tekstas_div.style.display = 'none';
+            isvalyti_piesima();
+
+            aktyvi_simuliacija = new p5((p) => {
+                let x = 0;
+
+                p.setup = () => {
+                    p.createCanvas(400, 300).parent(piesimo_konteineris);
+                    p.background(67, 75, 82);
+                };
+
+                p.draw = () => {
+                    p.background(70, 82, 92);
+                    p.fill(220, 53, 69);
+                    p.ellipse(x, p.height / 2, 50, 50);
+                    x += 2;
+                    if (x > p.width) x = 0;
+                };
+            });
+        }
+
+        rodyti_temas();
+    </script>
+</body>
+
+</html>
