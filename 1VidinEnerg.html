@@ -1,41 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="lt">
 
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8">
     <title>Vandens Būsenų Kitimo Simuliacija</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background: #f0f0f0;
             text-align: center;
             margin: 0;
             padding: 0;
         }
 
+        h2 {
+            margin-top: 20px;
+            font-size: 32px;
+            color: #333;
+        }
+
         #valdikliai {
-            margin: 15px;
+            margin: 20px;
+            font-size: 18px;
         }
 
-        canvas {
-            display: block;
-            margin: auto;
-        }
-
-        details {
-            max-width: 800px;
-            margin: 10px auto;
-            text-align: left;
-            padding: 10px;
-            background: #ffffff;
+        #valdikliai input,
+        #valdikliai button {
+            margin: 5px;
+            padding: 8px 12px;
+            font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
 
+        #valdikliai button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #valdikliai button:hover {
+            background-color: #45a049;
+        }
+
+        canvas {
+            display: block;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 8px;
+        }
+
+        details {
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: left;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
         summary {
             font-weight: bold;
+            font-size: 20px;
             cursor: pointer;
+        }
+
+        .bottom-button {
+            margin: 40px 0 20px 0;
+        }
+
+        .bottom-button a {
+            text-decoration: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .bottom-button a:hover {
+            background-color: #1976D2;
+        }
+
+        footer {
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 14px;
+            color: #888;
         }
     </style>
 </head>
@@ -45,12 +101,46 @@
 
     <div id="valdikliai">
         <label for="pradine_temp">Pradinė temperatūra (°C):</label>
-        <input id="pradine_temp" type="number" value="0" style="width:60px" />
-        <label for="galine_temp">Galinė temperatūra (°C):</label>
-        <input id="galine_temp" type="number" value="120" style="width:60px" />
+        <input id="pradine_temp" type="number" value="0" />
+        <label for="galine_temp">Galutinė temperatūra (°C):</label>
+        <input id="galine_temp" type="number" value="120" />
         <button onclick="pradetiSimuliacija()">Pradėti simuliaciją</button>
         <button onclick="nutrauktiSimuliacija()">Nutraukti</button>
     </div>
+
+    <div id="canvas-container"></div>
+
+    <details>
+        <summary>Paaiškinimas</summary>
+        <p>
+            Ši simuliacija parodo, kaip vandens dalelės juda kylant temperatūrai. Reguliuodami pradinę ir galutinę
+            temperatūrą galite stebėti raudoną liniją, kuri žymi temperatūros kitimą
+            laikui bėgant.
+        </p>
+        <ul>
+            <li>0°C = tirpimo temperatūra</li>
+            <li>100°C = virimo temperatūra</li>
+        </ul>
+    </details>
+
+    <details>
+        <summary>Daugiau informacijos</summary>
+        <p>Daugiau apie fazių pokyčius galite sužinoti šiuose šaltiniuose:</p>
+        <ul>
+            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/1541/20" target="_blank">Eduka: Kūnų
+                    vidinės energijos kitimo būdai</a></li>
+            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/31551/361" target="_blank">Eduka: Vidinė
+                    energija</a></li>
+        </ul>
+    </details>
+
+    <div class="bottom-button">
+        <a href="index.html">Grįžti į pradžią</a>
+    </div>
+
+    <footer>
+        2024–2025 &nbsp; | &nbsp; VGTU inžinerijos licėjus
+    </footer>
 
     <script>
         let temperatura = 0;
@@ -89,7 +179,8 @@
         }
 
         function setup() {
-            createCanvas(800, 600);
+            let canvas = createCanvas(800, 600);
+            canvas.parent('canvas-container');
             sukurtiMolekules();
         }
 
@@ -98,8 +189,8 @@
 
             stroke(180);
             noFill();
-            rect(40, 40, 720, 140); // grafikas
-            rect(200, 240, 400, 320); // molekulių dėžė
+            rect(40, 40, 720, 140);
+            rect(200, 240, 400, 320);
 
             piestiGrafika();
             piestiUzklausas();
@@ -162,10 +253,9 @@
 
         function piestiGrafika() {
             stroke(0);
-            line(50, 180, 750, 180); // x ašis
-            line(50, 50, 50, 180);   // y ašis
+            line(50, 180, 750, 180);
+            line(50, 50, 50, 180);
 
-            // Temperatūros linija
             noFill();
             stroke(255, 0, 0);
             beginShape();
@@ -177,10 +267,9 @@
             }
             endShape();
 
-            // Y ašies padalos
             fill(0);
             noStroke();
-            textSize(10);
+            textSize(12);
             let zingsnis = Math.ceil((tiksline_temperatura - pradine_temperatura) / 5);
             for (let t = pradine_temperatura; t <= tiksline_temperatura; t += zingsnis) {
                 let y = map(t, pradine_temperatura, tiksline_temperatura, 180, 50);
@@ -193,39 +282,13 @@
 
         function piestiUzklausas() {
             fill(0);
-            textSize(14);
+            textSize(18);
             text("Temperatūra pagal laiką", 400, 30);
-            textSize(12);
+            textSize(14);
             text("Dabartinė temperatūra: " + temperatura.toFixed(1) + "°C", 600, 220);
             text("Būsena: " + busena, 600, 235);
         }
     </script>
-
-    <!-- Paaiškinimas -->
-    <details>
-        <summary>Paaiškinimas</summary>
-        <p>
-            Ši simuliacija parodo, kaip vandens dalelės juda kylant temperatūrai. Reguliuodami pradinę ir galutinę
-            temperatūrą galite stebėti raudoną liniją, kuri žymi temperatūros kitimą
-            laikui bėgant.
-        </p>
-        <ul>
-            <li>0°C = tirpimo temperatūra</li>
-            <li>100°C = virimo temperatūra</li>
-        </ul>
-    </details>
-
-    <!-- Daugiau informacijos -->
-    <details>
-        <summary>Daugiau informacijos</summary>
-        <p>Daugiau apie fazių pokyčius galite sužinoti šiuose šaltiniuose:</p>
-        <ul>
-            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/1541/20?teachingPackageId=20&teachingGroupCreation=0&lesson=1258&subtype=tasks&pageFlip=11"
-                    target="_blank">Eduka: Kūnų vidinės energijos kitimo būdai</a></li>
-            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/31551/361?teachingPackageId=361&teachingGroupCreation=0&lesson=34433&subtype=tasks&pageFlip=6"
-                    target="_blank">Eduka: Vidinė energija</a></li>
-        </ul>
-    </details>
 </body>
 
 </html>
