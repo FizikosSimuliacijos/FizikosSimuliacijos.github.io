@@ -6,42 +6,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fizikos Simuliacijos</title>
     <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
             align-items: center;
-            padding: 40px;
+            padding: 30px 20px 40px;
             background-color: #36393f;
             color: #dcdddd;
         }
 
         h1 {
+            margin-top: 10px;
             color: #f0f8ff;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 48px;
+            text-align: center;
         }
 
         .antraste-pataisyta {
-            font-size: 18px;
-            margin-bottom: 30px;
+            font-size: 22px;
+            margin-bottom: 40px;
             text-align: center;
             color: #dcdddd;
         }
 
         .mygtuku_konteineris {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             flex-wrap: wrap;
-            margin-bottom: 25px;
+            margin-bottom: 35px;
             justify-content: center;
         }
 
         button {
-            padding: 15px 30px;
-            font-size: 18px;
+            padding: 20px 40px;
+            font-size: 20px;
             cursor: pointer;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             background-color: #434b52;
             color: #fff;
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
@@ -55,12 +66,12 @@
 
         #teksto_laukas {
             width: 80%;
-            height: 100px;
-            margin-bottom: 25px;
-            padding: 15px;
-            font-size: 16px;
+            height: 120px;
+            margin-bottom: 30px;
+            padding: 18px;
+            font-size: 18px;
             border: 1px solid #5865f2;
-            border-radius: 8px;
+            border-radius: 10px;
             box-sizing: border-box;
             background-color: #434b52;
             color: #dcdddd;
@@ -70,12 +81,12 @@
 
         #apie_tekstas {
             width: 80%;
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 25px;
+            padding: 22px;
             border: 1px solid #5865f2;
-            border-radius: 8px;
+            border-radius: 10px;
             background-color: #434b52;
-            font-size: 16px;
+            font-size: 18px;
             text-align: center;
             display: none;
             color: #dcdddd;
@@ -83,13 +94,23 @@
 
         canvas {
             border: 1px solid #5865f2;
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             background-color: #434b52;
+            margin-top: 20px;
         }
 
         #piesimo_konteineris {
-            margin-top: 20px;
+            margin-top: 25px;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 80px 0;
+            font-size: 18px;
+            color: #777;
+            text-align: center;
+            width: 100%;
         }
     </style>
 </head>
@@ -105,6 +126,10 @@
     <div id="piesimo_konteineris"></div>
     <div id="apie_tekstas">Ši svetainė skirta interaktyvioms fizikos simuliacijoms. Čia galite rasti įvairių
         simuliacijų, susijusių su 9 klasės fizikos kursu. Ji sukurta IUPD projektui.</div>
+
+    <footer>
+        2024–2025 &nbsp;|&nbsp; VGTU inžinerijos licėjus
+    </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
 
