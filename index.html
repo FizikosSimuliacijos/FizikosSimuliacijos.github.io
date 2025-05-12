@@ -18,7 +18,14 @@
 
         h1 {
             color: #f0f8ff;
+            margin-bottom: 15px;
+        }
+
+        .antraste-pataisyta {
+            font-size: 18px;
             margin-bottom: 30px;
+            text-align: center;
+            color: #dcdddd;
         }
 
         .mygtuku_konteineris {
@@ -89,6 +96,9 @@
 
 <body>
     <h1>Fizikos Simuliacijos</h1>
+    <p class="antraste-pataisyta">
+        Paspauskite ant norimos temos ir išsirinkite pagal ją sukurtą fizikos simuliaciją!
+    </p>
     <div id="pagrindinis" class="mygtuku_konteineris"></div>
     <div id="antrinis" class="mygtuku_konteineris"></div>
     <textarea id="teksto_laukas" style="display:none;" readonly></textarea>
@@ -101,7 +111,6 @@
     <script>
         const temos = ['Šiluminiai reiškiniai', 'Judėjimas ir jėgos', 'Mechaninis darbas, galia ir energija'];
 
-        // Kiekvienai temai priskiriamos simuliacijos ir jų nuorodos
         const simuliaciju_duomenys = {
             'Šiluminiai reiškiniai': [
                 { pavadinimas: 'Vidinės energijos simuliacija', nuoroda: '1VidinEnerg.html' },
@@ -153,7 +162,6 @@
                 pagrindinis_div.appendChild(mygtukas);
             });
 
-            // Sukuriame ir pridedame "Apie šią svetainę" mygtuką paskutinį
             const apie_mygtukas = document.createElement('button');
             apie_mygtukas.textContent = 'Apie šią svetainę';
             apie_mygtukas.onclick = () => {
@@ -173,11 +181,11 @@
 
             const simuliacijos = simuliaciju_duomenys[pasirinkta_tema];
 
-            simuliacijos.forEach(simuliacija => { // Pakeista iš simuliacijos[indeksas] į simuliacija
+            simuliacijos.forEach(simuliacija => {
                 const mygtukas = document.createElement('button');
                 mygtukas.textContent = simuliacija.pavadinimas;
                 mygtukas.onclick = () => {
-                    window.location.href = simuliacija.nuoroda; // Naudojama simuliacija.nuoroda
+                    window.location.href = simuliacija.nuoroda;
                 };
                 antrinis_div.appendChild(mygtukas);
             });
