@@ -7,59 +7,139 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      background: #f9f9f9;
+      background-color: #36393f;
+      color: #dcdddd;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 30px 20px 80px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin: 10px 0 20px;
+      font-size: 48px;
+      color: #f0f8ff;
+      text-align: center;
     }
 
     .skiltis {
-      padding: 10px;
-      background: #ffffff;
-      border-bottom: 1px solid #ccc;
+      width: 80%;
+      padding: 20px;
+      margin-bottom: 15px;
+      background-color: #434b52;
+      border: 1px solid #5865f2;
+      border-radius: 8px;
+      box-sizing: border-box;
     }
 
     .antraste {
       cursor: pointer;
+      padding: 12px;
+      margin-bottom: 10px;
       font-weight: bold;
-      background: #eee;
-      padding: 8px;
+      background-color: #4f545c;
+      color: #fff;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+
+    .antraste:hover {
+      background-color: #5865f2;
     }
 
     .turinys {
       display: none;
-      padding: 10px;
+      padding: 15px;
+      border-top: 1px solid #5865f2;
+    }
+
+    label,
+    .info div {
+      display: inline-block;
+      margin: 8px 15px 8px 0;
+      font-size: 16px;
+    }
+
+    input[type="number"],
+    select {
+      padding: 8px;
+      border: 1px solid #5865f2;
+      border-radius: 4px;
+      background-color: #4f545c;
+      color: #dcdddd;
+      font-size: 16px;
+    }
+
+    button,
+    #griztiPradziaMygt {
+      padding: 12px 25px;
+      margin: 10px 5px 0 0;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #434b52;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover,
+    #griztiPradziaMygt:hover {
+      background-color: #5865f2;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    #griztiPradziaMygt {
+      display: block;
+      margin: 20px auto 0;
+      font-size: 18px;
+      padding: 15px 30px;
+      border-radius: 10px;
     }
 
     canvas {
       display: block;
-      margin: auto;
+      margin: 20px auto;
+      background-color: #434b52;
+      border: 1px solid #5865f2;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
-    label,
-    .info {
-      margin-right: 15px;
-      display: inline-block;
+    footer {
+      margin-top: 40px;
+      padding: 40px 0;
+      font-size: 16px;
+      color: #777;
+      text-align: center;
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    .formule {
-      margin: 2px 0 10px 0;
-      font-size: 14px;
+    a {
+      color: #5865f2;
+      text-decoration: none;
+      transition: color 0.3s;
     }
 
-    #daugiau ul {
-      margin: 5px 0 0 20px;
+    a:hover {
+      color: #7289da;
     }
   </style>
+
 </head>
 
 <body>
-
-  <!-- Valdikliai -->
   <div class="skiltis">
     <label>Judėjimo tipas:
       <select id="judTipas">
-        <option value="tolygaus">Tolygaus</option>
-        <option value="pagreitinto">Pagreitinto</option>
+        <option value="tolygaus">Tolygus</option>
+        <option value="pagreitinto">Pagreitėjantis</option>
         <option value="laisvo">Laisvo kritimo</option>
       </select>
     </label>
@@ -76,7 +156,6 @@
     <button id="sustabdytiMygt">Sustabdyti</button>
   </div>
 
-  <!-- Informacija apie judėjimą -->
   <div class="skiltis info">
     <div><strong>Laikas:</strong> <span id="laikas">0.00</span> s</div>
     <div><strong>Atstumas:</strong> <span id="atstumas">0.00</span> m</div>
@@ -84,7 +163,6 @@
     <div><strong>Pagreitis:</strong> <span id="dabartinisPagreitis">0.00</span> m/s²</div>
   </div>
 
-  <!-- Paaiškinimas -->
   <div class="skiltis">
     <div class="antraste" onclick="toggleTurinys('paaiskinimasTurinys')">Paaiškinimas</div>
     <div class="turinys" id="paaiskinimasTurinys">
@@ -99,7 +177,6 @@
     </div>
   </div>
 
-  <!-- Formulės -->
   <div class="skiltis">
     <div class="antraste" onclick="toggleTurinys('formulesTurinys')">Matematinės formulės</div>
     <div class="turinys" id="formulesTurinys">
@@ -112,30 +189,48 @@
     </div>
   </div>
 
-  <!-- Daugiau informacijos -->
   <div class="skiltis">
     <div class="antraste" onclick="toggleTurinys('daugiauTurinys')">Daugiau informacijos</div>
     <div class="turinys" id="daugiauTurinys">
       <ul>
-        <li><a href="https://lt.wikipedia.org/wiki/Mechaninis_judėjimas" target="_blank">Judėjimas iš 11 klasės
+        <li><a
+            href="https://klase.eduka.lt/publisher/material/open/theory/30019/337?teachingPackageId=337&teachingGroupCreation=0&lesson=32618&subtype=tasks&pageFlip=48"
+            target="_blank">Judėjimas iš 11 klasės
             vadovėlio</a></li>
       </ul>
     </div>
   </div>
 
-  <!-- JavaScript funkcijos -->
+  <div id="simuliacijosLaukas"></div>
+
+  <button id="griztiPradziaMygt">Grįžti į pradžią</button>
+
+  <footer>
+    2024–2025 | VGTU inžinerijos licėjus
+  </footer>
+
   <script>
-    let kamuolys, laikas = 0, veikia = false, tipas = "tolygaus";
-    const mastelis = 10; // 1 metras = 10 pikselių
+    let kamuolys,
+      laikas = 0,
+      veikia = false,
+      tipas = "tolygaus";
+    const mastelis = 10;
+    let canvasas;
 
     function setup() {
-      let canvasas = createCanvas(800, 600);
-      canvasas.parent(document.body);
+      canvasas = createCanvas(800, 600);
+      canvasas.parent(document.getElementById('simuliacijosLaukas'));
       atstatytiKamuoli();
 
       // Mygtukai
-      document.getElementById("pradetiMygt").onclick = () => veikia = true;
-      document.getElementById("sustabdytiMygt").onclick = () => veikia = false;
+      document.getElementById("pradetiMygt").onclick = () => {
+        veikia = true;
+        loop(); // Paleidžiam p5.js loop funkciją
+      };
+      document.getElementById("sustabdytiMygt").onclick = () => {
+        veikia = false;
+        noLoop(); // Sustabdom p5.js loop funkciją
+      };
 
       // Judėjimo tipas keičiamas
       document.getElementById("judTipas").onchange = () => {
@@ -149,10 +244,18 @@
       });
 
       atnaujintiPaaiskinima();
+
+      // Mygtukas "Grįžti į pradžią"
+      document.getElementById("griztiPradziaMygt").onclick = () => {
+        // Čia įdėkite norimą grįžimo nuorodą
+        window.location.href =
+          "index.html"; // Pakeiskite į savo norimą nuorodą
+      };
+      noLoop(); // Sustabdom loop kol nepaspaustas pradėti
     }
 
     function draw() {
-      background(255);
+      background(70, 82, 92);
       nubraizytiZeme();
       aukscioZymejimai();
 
@@ -172,31 +275,32 @@
 
     // Nubraižoma žemė ir mastelis
     function nubraizytiZeme() {
-      stroke(0);
+      stroke(94, 101, 108);
       line(0, height - 50, width, height - 50);
 
-      stroke(180);
+      stroke(70, 82, 92);
       for (let i = 0; i <= width; i += mastelis * 5) {
         let metrai = i / mastelis;
         line(i, height - 50, i, height - 40);
         noStroke();
-        fill(100);
-        text(`${metrai} m`, i - 10, height - 25);
-        stroke(180);
+        fill(153, 170, 181);
+        textAlign(CENTER, TOP);
+        text(`${metrai} m`, i, height - 35);
+        stroke(70, 82, 92);
       }
     }
 
     // Aukščio skalė kairėje
     function aukscioZymejimai() {
-      stroke(180);
+      stroke(70, 82, 92);
       for (let i = height - 50; i > 0; i -= mastelis * 5) {
         let metrai = (height - 50 - i) / mastelis;
         line(0, i, 10, i);
         noStroke();
-        fill(100);
+        fill(153, 170, 181);
         textAlign(LEFT, CENTER);
         text(`${metrai} m`, 15, i);
-        stroke(180);
+        stroke(70, 82, 92);
       }
     }
 
@@ -222,10 +326,11 @@
     // Kamuolio duomenys
     class Kamuolys {
       constructor(y) {
-        this.pos = createVector(0, y);
+        this.pos = createVector(50, y);
         const v = parseFloat(document.getElementById("pradinisGreitis").value);
         this.greitis = tipas === "laisvo" ? createVector(0, 0) : createVector(v, 0);
         this.pagreitis = createVector(0, 0);
+        this.diametras = 20;
       }
 
       atnaujinti() {
@@ -238,15 +343,15 @@
           this.pos.x += this.greitis.x * dt * mastelis;
         } else if (tipas === "pagreitinto") {
           this.pagreitis.x = parseFloat(document.getElementById("pagreitis").value);
-          this.greitis.x += this.pagreitis.x * dt;
+          this.greitis.x += this.pagreitis.x * dt * mastelis;
           this.pos.x += this.greitis.x * dt * mastelis;
         } else if (tipas === "laisvo") {
           this.pagreitis.y = parseFloat(document.getElementById("gravitacija").value);
           this.greitis.y += this.pagreitis.y * dt;
           this.pos.y += this.greitis.y * dt * mastelis;
 
-          if (this.pos.y > height - 60) {
-            this.pos.y = height - 60;
+          if (this.pos.y > height - this.diametras / 2) {
+            this.pos.y = height - this.diametras / 2;
             this.greitis.y = 0;
             this.pagreitis.y = 0;
           }
@@ -255,25 +360,25 @@
 
       rodymas() {
         fill(70, 150, 255);
-        ellipse(this.pos.x + 50, this.pos.y, 20, 20);
+        ellipse(this.pos.x, this.pos.y, this.diametras, this.diametras);
       }
 
       gautiAtstuma() {
-        return tipas === "laisvo"
-          ? ((this.pos.y - 100) / mastelis).toFixed(2)
-          : (this.pos.x / mastelis).toFixed(2);
+        return tipas === "laisvo" ?
+          ((this.pos.y - 100) / mastelis).toFixed(2) :
+          (this.pos.x / mastelis).toFixed(2);
       }
 
       gautiGreiti() {
-        return tipas === "laisvo"
-          ? this.greitis.y.toFixed(2)
-          : this.greitis.x.toFixed(2);
+        return tipas === "laisvo" ?
+          this.greitis.y.toFixed(2) :
+          this.greitis.x.toFixed(2);
       }
 
       gautiPagrei() {
-        return tipas === "laisvo"
-          ? this.pagreitis.y.toFixed(2)
-          : this.pagreitis.x.toFixed(2);
+        return tipas === "laisvo" ?
+          this.pagreitis.y.toFixed(2) :
+          this.pagreitis.x.toFixed(2);
       }
     }
 
@@ -283,7 +388,6 @@
       turinys.style.display = turinys.style.display === "none" ? "block" : "none";
     }
   </script>
-
 </body>
 
 </html>
