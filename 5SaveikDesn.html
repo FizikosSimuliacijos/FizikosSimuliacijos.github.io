@@ -2,19 +2,21 @@
 <html lang="lt">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Sąveikos dėsnių simuliacija</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
     <style>
         body {
             font-family: sans-serif;
-            background: #f5f5f5;
+            background: #e3f2fd;
+            /* light blue background */
             text-align: center;
         }
 
         canvas {
             background: white;
-            border: 1px solid #ccc;
+            border: 2px solid #90caf9;
+            /* soft blue border */
             margin-top: 10px;
         }
 
@@ -27,23 +29,52 @@
             display: inline-block;
         }
 
+        input[type="number"] {
+            border: 1px solid #90caf9;
+            border-radius: 4px;
+            padding: 4px;
+        }
+
         button {
-            margin-top: 10px;
+            background-color: #1e88e5;
+            /* blue button */
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1565c0;
+            /* darker on hover */
         }
 
         .info-skyrius {
             max-width: 700px;
             margin: 15px auto;
             text-align: left;
-            background: #eef;
+            background: #e3f2fd;
+            /* very light blue */
             padding: 10px;
-            border: 1px solid #ccd;
+            border: 1px solid #90caf9;
             display: none;
+            border-radius: 6px;
         }
 
         a {
-            color: #00f;
+            color: #1565c0;
             text-decoration: underline;
+        }
+
+        .bottom-button {
+            margin-top: 30px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            color: #888;
         }
     </style>
 </head>
@@ -52,19 +83,29 @@
     <h2>Sąveikos dėsnių simuliacija</h2>
     <p>Ši simuliacija parodo, kaip kūnai sąveikauja pagal Niutono dėsnius.</p>
 
+    <!-- Valdikliai ir mygtukai -->
     <div class="valdikliai">
-        <label>Masė 1 (kg): <input type="number" id="mase1" value="5" min="1" max="20"></label>
-        <label>Greitis 1 (m/s): <input type="number" id="greitis1" value="2" min="-10" max="10"></label>
-        <label>Masė 2 (kg): <input type="number" id="mase2" value="2" min="1" max="20"></label>
-        <label>Greitis 2 (m/s): <input type="number" id="greitis2" value="0" min="-10" max="10"></label>
+        <label>Masė 1 (kg): <input type="number" id="mase1" value="5" min="1" max="20" /></label>
+        <label>Greitis 1 (m/s): <input type="number" id="greitis1" value="2" min="-10" max="10" /></label>
+        <label>Masė 2 (kg): <input type="number" id="mase2" value="2" min="1" max="20" /></label>
+        <label>Greitis 2 (m/s): <input type="number" id="greitis2" value="0" min="-10" max="10" /></label>
+        <br />
         <button onclick="atstatytiSimuliacija()">Iš naujo paleisti</button>
         <button onclick="rodytiPaaiskinima()">Rodyti / Slėpti paaiškinimą</button>
         <button onclick="rodytiNuorodas()">Rodyti / Slėpti informaciją</button>
     </div>
 
-    <p><strong>Susidūrimų skaičius:</strong> <span id="susidurimuSkaicius">0</span></p>
+    <!-- Informacija apie susidūrimus -->
+    <p style="text-align: center;">
+        <strong>Susidūrimų skaičius:</strong> <span id="susidurimuSkaicius">0</span>
+    </p>
 
-    <!-- Paaiškinimas -->
+    <!-- Simuliacijos laukas -->
+    <div id="simuliacija">
+        <!-- Canvas sukuriamas per p5.js -->
+    </div>
+
+    <!-- Paaiškinimo skyrius -->
     <div id="paaiskinimas" class="info-skyrius">
         <h3>Fizikos paaiškinimas</h3>
         <p>Simuliacijoje taikomi šie Niutono dėsniai:</p>
@@ -75,7 +116,7 @@
             <li><strong>Impulsas:</strong> <code>p = m × v</code></li>
             <li><strong>Elastinio susidūrimo formulės:</strong></li>
             <code>
-        v<sub>1galutin.</sub> = (m₁−m₂)/(m₁+m₂) × v₁ + 2m₂/(m₁+m₂) × v₂<br>
+        v<sub>1galutin.</sub> = (m₁−m₂)/(m₁+m₂) × v₁ + 2m₂/(m₁+m₂) × v₂<br />
         v<sub>2galutin.</sub> = (m₂−m₁)/(m₁+m₂) × v₂ + 2m₁/(m₁+m₂) × v₁
       </code>
         </ul>
@@ -90,7 +131,7 @@
         </ul>
     </div>
 
-    <!-- Nuorodos -->
+    <!-- Nuorodų skyrius -->
     <div id="nuorodos" class="info-skyrius">
         <h3>Daugiau informacijos</h3>
         <ul>
@@ -101,12 +142,21 @@
         </ul>
     </div>
 
+    <!-- Grįžimo mygtukas -->
+    <div class="bottom-button">
+        <button onclick="window.location.href='https://example.com';">Grįžti į pradžią</button>
+    </div>
+
+    <footer>
+        &copy; 2025 Sąveikos simuliacija
+    </footer>
+
     <script>
         let kunas1, kunas2;
         let susidurimuSkaicius = 0;
         let pikseliaiPerMetra = 50;
 
-        // Klasė kūnui su fizika
+        // Klasė kūnui su fizikos parametrais
         class Kunas {
             constructor(x, mase, greitis, spalva) {
                 this.x = x;
@@ -120,7 +170,7 @@
             atnaujinti() {
                 this.x += this.greitis;
 
-                // Atsimušimas į sieną (elastingas)
+                // Patikrina atsitrenkimą į sienas
                 if (this.x < 0) {
                     this.x = 0;
                     this.greitis *= -1;
@@ -144,7 +194,7 @@
             }
 
             issprestiSusidurima(suKitu) {
-                // Elastingo susidūrimo formulės
+                // Apskaičiuoja galutinius greičius pagal elastingo susidūrimo formulę
                 let u1 = this.greitis;
                 let u2 = suKitu.greitis;
                 let m1 = this.mase;
@@ -156,7 +206,7 @@
                 susidurimuSkaicius++;
                 document.getElementById("susidurimuSkaicius").textContent = susidurimuSkaicius;
 
-                // Atstūmimas, kad neįstrigtų
+                // Pakeičia pozicijas, kad kūnai neįstrigtų
                 if (this.x < suKitu.x) {
                     this.x -= 1;
                     suKitu.x += 1;
@@ -168,14 +218,14 @@
         }
 
         function setup() {
-            createCanvas(800, 400);
+            createCanvas(800, 400).parent("simuliacija");
             atstatytiSimuliacija();
         }
 
         function draw() {
             background(255);
 
-            // Atnaujina ir piešia abu kūnus
+            // Atnaujina kūnų būsenas
             kunas1.atnaujinti();
             kunas2.atnaujinti();
 
@@ -183,10 +233,11 @@
                 kunas1.issprestiSusidurima(kunas2);
             }
 
+            // Nupiešia kūnus
             kunas1.piesti();
             kunas2.piesti();
 
-            // Informacija ekrane
+            // Informacija viršuje
             fill(0);
             textAlign(LEFT);
             textSize(14);
@@ -194,7 +245,7 @@
             text(`Kūnas 2: masė=${kunas2.mase} kg, greitis=${kunas2.greitis.toFixed(2)} m/s`, 10, 40);
         }
 
-        // Atstato simuliaciją iš naujo
+        // Iš naujo paleidžia simuliaciją
         function atstatytiSimuliacija() {
             let m1 = parseFloat(document.getElementById("mase1").value);
             let g1 = parseFloat(document.getElementById("greitis1").value);
@@ -208,13 +259,13 @@
             document.getElementById("susidurimuSkaicius").textContent = "0";
         }
 
-        // Perjungia paaiškinimo skiltį
+        // Rodo/slėpia paaiškinimą
         function rodytiPaaiskinima() {
             let skiltis = document.getElementById("paaiskinimas");
             skiltis.style.display = skiltis.style.display === "block" ? "none" : "block";
         }
 
-        // Perjungia nuorodų skiltį
+        // Rodo/slėpia nuorodų sekciją
         function rodytiNuorodas() {
             let skiltis = document.getElementById("nuorodos");
             skiltis.style.display = skiltis.style.display === "block" ? "none" : "block";
