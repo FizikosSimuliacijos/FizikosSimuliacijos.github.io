@@ -6,132 +6,202 @@
     <title>Archimedo jėgos simuliacija</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
-        /* Stilius puslapiui */
+        :root {
+            --primary-bg: #e3f2fd;
+            --panel-bg: #bbdefb;
+            --border-color: #90caf9;
+            --text-color: #0d47a1;
+            --button-bg: #2196f3;
+            --button-hover: #1976d2;
+            --button-text: white;
+            --canvas-bg: #e1f5fe;
+        }
+
         body {
             margin: 0;
             padding: 0;
             font-family: sans-serif;
+            background: var(--primary-bg);
             display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #mainContent {
+            display: flex;
+            flex-grow: 1;
         }
 
         /* Valdikliai */
         #valdikliai {
-            background: #f0f0f0;
-            padding: 10px;
-            border-right: 1px solid #ccc;
-            width: 260px;
-            height: 100vh;
+            background: var(--panel-bg);
+            padding: 16px;
+            border-right: 2px solid var(--border-color);
+            width: 280px;
             box-sizing: border-box;
             overflow-y: auto;
         }
 
         label {
             font-size: 14px;
+            color: var(--text-color);
         }
 
         input {
             width: 100%;
-            margin: 2px 0 8px 0;
+            margin: 4px 0 12px 0;
+            padding: 4px;
             box-sizing: border-box;
         }
 
         button {
-            margin-top: 5px;
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            padding: 10px;
+            margin-top: 6px;
             width: 100%;
+            cursor: pointer;
+            font-weight: bold;
             box-sizing: border-box;
+            transition: background 0.3s;
         }
 
-        /* Paaiškinimo ir papildomos informacijos skyriai */
+        button:hover {
+            background-color: var(--button-hover);
+        }
+
+        /* Paaiškinimai */
         #paaiskinimas,
         #daugiauInformacijos {
             display: none;
-            background: #f9f9f9;
+            background: white;
             padding: 10px;
             margin-top: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
         }
 
-        /* Canvas konteineris dešinėje pusėje */
         #canvasContainer {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-grow: 1;
-            background: #ddd;
-            height: 100vh;
+            background: var(--canvas-bg);
+            height: 400px;
+        }
+
+        #bottomButtonContainer {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            background: var(--panel-bg);
+            border-top: 2px solid var(--border-color);
+        }
+
+        #bottomButtonContainer a {
+            text-decoration: none;
+        }
+
+        #bottomButtonContainer button {
+            max-width: 300px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: var(--primary-bg);
+            font-size: 12px;
+            color: #555;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Valdikliai -->
-    <div id="valdikliai">
-        <label>Masa (kg):</label><br>
-        <input type="number" id="masesIvestis" value="10" step="0.1"><br>
+    <!-- Pagrindinis turinys -->
+    <div id="mainContent">
 
-        <label>Tūris (m³):</label><br>
-        <input type="number" id="turioIvestis" value="0.02" step="0.001"><br>
+        <!-- Valdikliai -->
+        <div id="valdikliai">
+            <label>Masa (kg):</label><br>
+            <input type="number" id="masesIvestis" value="10" step="0.1"><br>
 
-        <label>Skysčio tankis (kg/m³):</label><br>
-        <input type="number" id="skyscioTankioIvestis" value="1000" step="10"><br>
+            <label>Tūris (m³):</label><br>
+            <input type="number" id="turioIvestis" value="0.02" step="0.001"><br>
 
-        <label>Gravitacija (m/s²):</label><br>
-        <input type="number" id="gravitacijosIvestis" value="9.81" step="0.01"><br>
+            <label>Skysčio tankis (kg/m³):</label><br>
+            <input type="number" id="skyscioTankioIvestis" value="1000" step="10"><br>
 
-        <!-- Simuliacijos valdymo mygtukai -->
-        <button id="pradetiMygtukas">Pradėti</button>
-        <button id="sustabdytiMygtukas">Sustabdyti</button>
+            <label>Gravitacija (m/s²):</label><br>
+            <input type="number" id="gravitacijosIvestis" value="9.81" step="0.01"><br>
 
-        <!-- Paaiškinimų mygtukai -->
-        <button id="rodytiPaaiskinima">Rodyti paaiškinimą</button>
-        <button id="rodytiDaugiau">Rodyti daugiau informacijos</button>
+            <!-- Simuliacijos valdymo mygtukai -->
+            <button id="pradetiMygtukas">Pradėti</button>
+            <button id="sustabdytiMygtukas">Sustabdyti</button>
 
-        <!-- Paaiškinimas apie fiziką -->
-        <div id="paaiskinimas">
-            <h3>Paaiškinimas</h3>
-            <p><b>Archimedo dėsnis:</b></p>
-            <p>Skysčio stumiamoji jėga (Archimedo jėga) lygi kūno išstumto skysčio svoriui.</p>
+            <!-- Paaiškinimų mygtukai -->
+            <button id="rodytiPaaiskinima">Rodyti paaiškinimą</button>
+            <button id="rodytiDaugiau">Rodyti daugiau informacijos</button>
 
-            <h4>Naudojamos formulės:</h4>
-            <ul>
-                <li><b>Archimedo jėga:</b> Fb = ρ × V × g</li>
-                <li><b>Gravitacinė jėga:</b> Fg = m × g</li>
-            </ul>
+            <!-- Paaiškinimas apie fiziką -->
+            <div id="paaiskinimas">
+                <h3>Paaiškinimas</h3>
+                <p><b>Archimedo dėsnis:</b></p>
+                <p>Skysčio stumiamoji jėga (Archimedo jėga) lygi kūno išstumto skysčio svoriui.</p>
 
-            <h4>Formulėse:</h4>
-            <ul>
-                <li><b>Fb</b> – Archimedo jėga (N)</li>
-                <li><b>Fg</b> – Gravitacinė jėga (N)</li>
-                <li><b>ρ</b> – Skysčio tankis (kg/m³)</li>
-                <li><b>V</b> – Kūno tūris (m³)</li>
-                <li><b>g</b> – Gravitacijos pagreitis (m/s²)</li>
-                <li><b>m</b> – Kūno masė (kg)</li>
-            </ul>
+                <h4>Naudojamos formulės:</h4>
+                <ul>
+                    <li><b>Archimedo jėga:</b> Fb = ρ × V × g</li>
+                    <li><b>Gravitacinė jėga:</b> Fg = m × g</li>
+                </ul>
 
-            <h4>Sprendimo logika:</h4>
-            <ul>
-                <li>Jei <b>Fb > Fg</b> → Kūnas plūduriuoja</li>
-                <li>Jei <b>Fb < Fg</b> → Kūnas skęsta</li>
-            </ul>
+                <h4>Formulėse:</h4>
+                <ul>
+                    <li><b>Fb</b> – Archimedo jėga (N)</li>
+                    <li><b>Fg</b> – Gravitacinė jėga (N)</li>
+                    <li><b>ρ</b> – Skysčio tankis (kg/m³)</li>
+                    <li><b>V</b> – Kūno tūris (m³)</li>
+                    <li><b>g</b> – Gravitacijos pagreitis (m/s²)</li>
+                    <li><b>m</b> – Kūno masė (kg)</li>
+                </ul>
+
+                <h4>Sprendimo logika:</h4>
+                <ul>
+                    <li>Jei <b>Fb > Fg</b> → Kūnas plūduriuoja</li>
+                    <li>Jei <b>Fb < Fg</b> → Kūnas skęsta</li>
+                </ul>
+            </div>
+
+            <!-- Daugiau informacijos - po paaiškinimo -->
+            <div id="daugiauInformacijos">
+                <h3>Daugiau informacijos</h3>
+                <p>Archimedo dėsnis taikomas ne tik skysčiams, bet ir dujoms, pavyzdžiui, oro balionams atmosferoje.</p>
+                <p>Sužinok daugiau:</p>
+                <ul>
+                    <li><a href="https://klase.eduka.lt/publisher/material/open/theory/12384/19?teachingPackageId=19&teachingGroupCreation=0&lesson=1224&subtype=tasks&pageFlip=87"
+                            target="_blank">Eduka: Archimedo jėga</a></li>
+                    <li><a href="https://klase.eduka.lt/publisher/material/open/theory/12384/19?teachingPackageId=19&teachingGroupCreation=0&lesson=1224&subtype=tasks&pageFlip=91"
+                            target="_blank">Eduka: Kodėl neskęsta laivai ir skraido oro balionai?</a></li>
+                </ul>
+            </div>
         </div>
 
-        <!-- Daugiau informacijos - po paaiškinimo -->
-        <div id="daugiauInformacijos">
-            <h3>Daugiau informacijos</h3>
-            <p>Archimedo dėsnis taikomas ne tik skysčiams, bet ir dujoms, pavyzdžiui, oro balionams atmosferoje.</p>
-            <p>Sužinok daugiau:</p>
-            <ul>
-                <li><a href="https://klase.eduka.lt/publisher/material/open/theory/12384/19?teachingPackageId=19&teachingGroupCreation=0&lesson=1224&subtype=tasks&pageFlip=87"
-                        target="_blank">Eduka: Archimedo jėga</a></li>
-                <li><a href="https://klase.eduka.lt/publisher/material/open/theory/12384/19?teachingPackageId=19&teachingGroupCreation=0&lesson=1224&subtype=tasks&pageFlip=91"
-                        target="_blank">Eduka: Kodėl neskęsta laivai ir skraido oro balionai?</a></li>
-            </ul>
-        </div>
+        <!-- Canvas vieta -->
+        <div id="canvasContainer"></div>
     </div>
 
-    <!-- Canvas vieta -->
-    <div id="canvasContainer"></div>
+    <!-- Grįžimo mygtukas -->
+    <div id="bottomButtonContainer">
+        <a href="https://example.com">
+            <button>Grįžti į pradžią</button>
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        © 2025 Archimedo simuliacija
+    </footer>
 
     <script>
         // Pagrindiniai kintamieji
