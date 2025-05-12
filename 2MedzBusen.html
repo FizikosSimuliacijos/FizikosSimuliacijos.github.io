@@ -6,6 +6,7 @@
     <title>Šilumos Perdavimo Simuliacija</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <style>
+        /* Bendras puslapio stilius */
         body {
             font-family: sans-serif;
             background: #f0f0f0;
@@ -14,35 +15,107 @@
             padding: 0;
         }
 
+        /* Antraštė */
+        h2 {
+            margin-top: 20px;
+            font-size: 32px;
+            color: #333;
+        }
+
+        /* Valdikliai */
         #valdikliai {
-            margin: 15px;
+            margin: 20px;
+            font-size: 18px;
         }
 
-        canvas {
-            display: block;
-            margin: auto;
-        }
-
-        details {
-            max-width: 800px;
-            margin: 10px auto;
-            text-align: left;
-            padding: 10px;
-            background: #ffffff;
+        #valdikliai input,
+        #valdikliai button {
+            margin: 5px;
+            padding: 8px 12px;
+            font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
+        }
+
+        #valdikliai button {
+            background-color: #4285f4;
+            /* Blue color from the original palette */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #valdikliai button:hover {
+            background-color: #357ae8;
+            /* Slightly darker blue */
+        }
+
+        /* Grįžti į pradžią mygtukas */
+        .button-container {
+            margin: 30px 0;
+        }
+
+        .back-button {
+            background-color: #4285f4;
+            /* Blue color from the original palette */
+            color: white;
+            padding: 12px 24px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: #357ae8;
+            /* Slightly darker blue */
+        }
+
+        /* Informaciniai blokai (details) */
+        details {
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: left;
+            padding: 15px;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
         }
 
         summary {
             font-weight: bold;
             cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 14px;
+            color: #777;
+        }
+
+        /* Canvas (simuliacija) */
+        #canvas-container {
+            margin: 20px auto;
+            width: fit-content;
+        }
+
+        canvas {
+            display: block;
         }
     </style>
 </head>
 
 <body>
+
+    <!-- Puslapio antraštė -->
     <h2>Šilumos Perdavimo Simuliacija</h2>
 
+    <!-- Valdikliai -->
     <div id="valdikliai">
         <label for="temp1">Kūno A pradinė temperatūra (°C):</label>
         <input id="temp1" type="number" value="80" style="width:60px" />
@@ -52,6 +125,47 @@
         <button onclick="stopSimulation()">Nutraukti</button>
     </div>
 
+    <!-- Paaiškinimas -->
+    <details>
+        <summary>Paaiškinimas</summary>
+        <p>
+            Ši simuliacija parodo šilumos mainus tarp dviejų kūnų. Kūnai pradeda su skirtingomis temperatūromis.
+            Bėgant laikui, jų temperatūros išsilygina dėl šilumos perdavimo.
+        </p>
+        <ul>
+            <li>Raudona spalva reiškia aukštesnę temperatūrą</li>
+            <li>Mėlyna spalva reiškia žemesnę temperatūrą</li>
+            <li>Temperatūros lyginasi tol, kol pasiekia pusiausvyrą. Esant dideliam temperatūrų skirtumui temperatūrų
+                pokytis greitesnis, nei esant mažesniam temperatūrų skirtumui.</li>
+        </ul>
+    </details>
+
+    <!-- Daugiau informacijos -->
+    <details>
+        <summary>Daugiau informacijos</summary>
+        <p>Daugiau apie šilumos perdavimą galite sužinoti čia:</p>
+        <ul>
+            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/31551/361" target="_blank">Eduka: Vidinė
+                    energija</a></li>
+            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/1541/20?teachingPackageId=20&teachingGroupCreation=0&lesson=1258&subtype=tasks&pageFlip=7"
+                    target="_blank">Eduka: Šiluminis judėjimas</a></li>
+        </ul>
+    </details>
+
+    <!-- Canvas (simuliacija) -->
+    <div id="canvas-container"></div>
+
+    <!-- Grįžti į pradžią mygtukas -->
+    <div class="button-container">
+        <a href="index.html" class="back-button">Grįžti į pradžią</a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        2024–2025 &nbsp; | &nbsp; VGTU inžinerijos licėjus
+    </footer>
+
+    <!-- Simuliacijos kodas su p5.js -->
     <script>
         let temperatureA = 80;
         let temperatureB = 20;
@@ -68,25 +182,29 @@
         }
 
         function setup() {
-            createCanvas(600, 300);
+            let canvas = createCanvas(600, 300);
+            canvas.parent('canvas-container'); // Labai svarbu - pririšame canvas prie teisingos vietos!
         }
 
         function draw() {
             background(240);
+
             fill(0);
-            textSize(16);
+            textSize(20);
             textAlign(CENTER);
             text("Šilumos Perdavimo Simuliacija", width / 2, 30);
 
             // Kūnų atvaizdavimas
-            fill(lerpColor(color(0, 0, 255), color(255, 0, 0), temperatureA / 100));
+            fill(lerpColor(color(0, 0, 255), color(255, 0, 0), constrain(temperatureA / 100, 0, 1)));
             rect(150, 100, 100, 100);
-            fill(lerpColor(color(0, 0, 255), color(255, 0, 0), temperatureB / 100));
+
+            fill(lerpColor(color(0, 0, 255), color(255, 0, 0), constrain(temperatureB / 100, 0, 1)));
             rect(350, 100, 100, 100);
 
             fill(0);
-            text(`A temperatūra: ${temperatureA.toFixed(1)}°C`, 200, 220);
-            text(`B temperatūra: ${temperatureB.toFixed(1)}°C`, 400, 220);
+            textSize(16);
+            text(`A temperatūra: ${temperatureA.toFixed(1)}°C`, 200, 230);
+            text(`B temperatūra: ${temperatureB.toFixed(1)}°C`, 400, 230);
 
             if (running) {
                 let avg = (temperatureA + temperatureB) / 2;
@@ -100,30 +218,6 @@
         }
     </script>
 
-    <details>
-        <summary>Paaiškinimas</summary>
-        <p>
-            Ši simuliacija parodo šilumos mainus tarp dviejų kūnų. Kūnai pradeda su skirtingomis temperatūromis.
-            Bėgant laikui, jų temperatūros išsilygina dėl šilumos perdavimo.
-        </p>
-        <ul>
-            <li>Raudona spalva reiškia aukštesnę temperatūrą</li>
-            <li>Mėlyna spalva reiškia žemesnę temperatūrą</li>
-            <li>Temperatūros lyginasi tol, kol pasiekia pusiausvyrą. Esant dideliam temperatūrų skirtumui temperatūrų
-                pokytis greitesnis, nei esant mažesniam temperatūrų skirtumui.</li>
-        </ul>
-    </details>
-
-    <details>
-        <summary>Daugiau informacijos</summary>
-        <p>Daugiau apie šilumos perdavimą galite sužinoti čia:</p>
-        <ul>
-            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/31551/361" target="_blank">Eduka: Vidinė
-                    energija</a></li>
-            <li><a href="https://klase.eduka.lt/publisher/material/open/theory/1541/20?teachingPackageId=20&teachingGroupCreation=0&lesson=1258&subtype=tasks&pageFlip=7"
-                    target="_blank">Eduka: Šiluminis judėjimas</a></li>
-        </ul>
-    </details>
 </body>
 
 </html>
