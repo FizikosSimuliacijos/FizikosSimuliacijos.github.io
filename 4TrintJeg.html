@@ -5,51 +5,101 @@
     <meta charset="UTF-8">
     <title>Trinties jėgų simuliacija</title>
     <style>
+        :root {
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --accent: #2563eb;
+            --accent-hover: #1e40af;
+            --text: #1f2937;
+            --border: #d1d5db;
+        }
+
         body {
-            font-family: sans-serif;
-            background: #f5f5f5;
-            text-align: center;
+            font-family: "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
             margin: 0;
             padding: 0;
         }
 
-        canvas {
-            display: block;
-            margin: 0 auto;
-            background: #fff;
-            border: 1px solid #ccc;
+        h2,
+        p {
+            text-align: center;
         }
 
         #valdikliai {
-            margin: 10px auto;
+            background: var(--card);
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
             width: 90%;
             max-width: 700px;
-            text-align: left;
         }
 
         label {
             display: block;
-            margin-top: 10px;
+            margin-top: 15px;
+        }
+
+        input[type="range"] {
+            width: 100%;
         }
 
         button {
-            margin-top: 10px;
-            margin-right: 5px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            margin-top: 12px;
+            margin-right: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        canvas {
+            display: block;
+            margin: 30px auto;
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: 8px;
         }
 
         #paaiskinimas,
         #daugiauInfo {
-            background: #eef;
-            padding: 10px;
-            margin: 10px auto;
-            max-width: 700px;
+            background: #e0ecff;
+            padding: 15px;
+            margin: 20px auto;
+            border-radius: 10px;
             border: 1px solid #ccd;
+            max-width: 700px;
             display: none;
         }
 
         a {
-            color: #00f;
-            text-decoration: underline;
+            color: var(--accent);
+        }
+
+        .bottom-button {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0 20px;
+        }
+
+        .bottom-button a {
+            text-decoration: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9em;
+            color: #555;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
@@ -119,10 +169,25 @@
             <li><a href="https://klase.eduka.lt/publisher/material/open/theory/30010/337?teachingPackageId=337&teachingGroupCreation=0&lesson=32609&subtype=tasks&pageFlip=140"
                     target="_blank">Eduka: Trinties jėga</a></li>
             <li><a href="https://klase.eduka.lt/publisher/material/open/theory/30010/337?teachingPackageId=337&teachingGroupCreation=0&lesson=32609&subtype=tasks&pageFlip=102"
-                    target="_blank">Eduka: Jėgos</a>
-            </li>
+                    target="_blank">Eduka: Jėgos</a></li>
         </ul>
     </div>
+
+    <!-- Canvas is rendered by p5.js -->
+    <div id="simulation-container">
+        <!-- Simulation field will be rendered here -->
+    </div>
+
+    <!-- Bottom button -->
+    <div class="bottom-button">
+        <a href="index.html">
+            <button>Grįžti į pradžią</button>
+        </a>
+    </div>
+
+    <footer>
+        © 2025 Fizikos simuliacija
+    </footer>
 
     <script>
         let medzDefault = { pavadinimas: "Medis", trintis: 0.3, spalva: "#deb887" };
@@ -135,7 +200,8 @@
         let zemesY, maxX;
 
         function setup() {
-            createCanvas(900, 370);
+            let canvas = createCanvas(900, 370);
+            canvas.parent('simulation-container');
             zemesY = height - 50;
             maxX = width - 100;
 
