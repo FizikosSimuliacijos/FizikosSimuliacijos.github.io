@@ -147,14 +147,6 @@
                 { pavadinimas: 'Sąveikos dėsnių simuliacija', nuoroda: '5SaveikDesn.html' },
                 { pavadinimas: 'Archimedo jėgos simuliacija', nuoroda: '6Archimed.html' },
             ],
-            'Mechaninis darbas, galia ir energija': [
-                { pavadinimas: 'Mechaninio darbo ir galios simuliacija 1', nuoroda: 'https://www.google.com' },
-                { pavadinimas: 'Mechaninio darbo ir galios simuliacija 2', nuoroda: 'https://www.youtube.com' },
-                { pavadinimas: 'Mechaninės energijos simuliacija 1', nuoroda: 'https://www.facebook.com' },
-                { pavadinimas: 'Mechaninės energijos simuliacija 2', nuoroda: 'https://www.twitter.com' },
-                { pavadinimas: 'Paprastųjų mechanizmų simuliacija 1', nuoroda: 'https://www.google.com' },
-                { pavadinimas: 'Paprastųjų mechanizmų simuliacija 2', nuoroda: 'https://www.youtube.com' }
-            ]
         };
 
         const pagrindinis_div = document.getElementById('pagrindinis');
@@ -199,6 +191,11 @@
         }
 
         function rodyti_simuliacijas(pasirinkta_tema) {
+            if (pasirinkta_tema === 'Mechaninis darbas ir galia') {
+                window.location.href = '7MechanDarbSimuliacija.html';
+                return;
+            }
+
             antrinis_div.innerHTML = '';
             teksto_laukas.style.display = 'none';
             apie_tekstas_div.style.display = 'none';
@@ -215,6 +212,7 @@
                 antrinis_div.appendChild(mygtukas);
             });
         }
+
 
         function ikelti_simuliacija(tema, sim_pavadinimas, simuliacijos_numeris) {
             teksto_laukas.style.display = 'block';
