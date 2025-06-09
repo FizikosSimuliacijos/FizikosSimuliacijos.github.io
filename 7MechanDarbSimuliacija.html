@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="lt">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Mechaninis darbas ir galia - Simuliacija</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #e3f2fd;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        canvas {
+            background: white;
+            border: 2px solid #90caf9;
+            margin-top: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .valdikliai {
+            margin-top: 10px;
+        }
+
+        label {
+            margin: 10px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 16px;
+            color: #0d47a1;
+        }
+
+        input[type="number"] {
+            border: 1px solid #90caf9;
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 16px;
+            width: 90px;
+            text-align: center;
+        }
+
+        button {
+            background-color: #1e88e5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 8px 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1565c0;
+        }
+
+        .info-skyrius {
+            max-width: 700px;
+            margin: 15px auto;
+            text-align: left;
+            background: #e3f2fd;
+            padding: 15px 20px;
+            border: 1px solid #90caf9;
+            display: none;
+            border-radius: 6px;
+            color: #0d47a1;
+            font-size: 16px;
+            line-height: 1.5em;
+        }
+
+        a {
+            color: #1565c0;
+            text-decoration: underline;
+        }
+
+        .bottom-button {
+            margin-top: 30px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        #output {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #0d47a1;
+            font-weight: 600;
+            min-height: 54px;
+        }
+
+        /* Centruoja turinį ir riboja plotį */
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="valdikliai">
+            <!--laukeliai jėgai, atstumui ir laikui-->
+            <label>Jėga (N): <input type="number" id="jega" value="10" min="0" step="0.1" /></label>
+            <label>Atstumas (m): <input type="number" id="atstumas" value="5" min="0" step="0.1" /></label>
+            <label>Laikas (s): <input type="number" id="laikas" value="2" min="0.01" step="0.01" /></label>
+            <br />
+            <!--Mygtukai valdyti simuliaciją ir informacijos rodymą-->
+            <button onclick="pradetiSimuliacija()">Pradėti simuliaciją</button>
+            <button onclick="resetuotiSimuliacija()">Iš naujo paleisti</button>
+            <button onclick="perjungtiPasiskaicinima()">Rodyti / Slėpti paaiškinimą</button>
+            <button onclick="perjungtiNuorodas()">Rodyti / Slėpti nuorodas</button>
+        </div>
+
+        <div id="output"></div>
+
+        <!-- Paaiškinimų skyrius -->
+        <div id="paaiskinimas" class="info-skyrius">
+            <h3>Fizikos paaiškinimas</h3>
+            <p><strong>Mechaninis darbas (W):</strong> darbas yra jėgos F atliktas perkeliant objektą per atstumą d.
+                Darbas apskaičiuojamas taip:</p>
+            <p style="text-align:center; font-weight:bold; font-size: 18px;">W = F × d</p>
+            <p><strong>Galia (P):</strong> darbas padalintas iš laiko t, per kurį tas darbas buvo atliktas:</p>
+            <p style="text-align:center; font-weight:bold; font-size: 18px;">P = W / t</p>
+            <p><em>Matavimo vienetai:</em></p>
+            <ul>
+                <li>Darbas W – džiauliais (J)</li>
+                <li>Jėga F – niutonais (N)</li>
+                <li>Atstumas d – metrais (m)</li>
+                <li>Laikas t – sekundėmis (s)</li>
+                <li>Galia P – vatais (W)</li>
+            </ul>
+            <p><strong>Pastabos:</strong>
+                Darbas yra teigiamas, kai jėga ir judėjimo kryptis sutampa. Jei jėga veikia priešinga kryptimi, darbas
+                gali būti neigiamas. Galia nurodo, kiek darbo atlikta per laiko vienetą.</p>
+        </div>
+
+        <!-- Nuorodų skyrius -->
+        <div id="nuorodos" class="info-skyrius">
+            <h3>Daugiau informacijos</h3>
+            <ul>
+                <li><a href="https://lt.wikipedia.org/wiki/Darbas_(fizika)" target="_blank" rel="noopener">Darbas
+                        (fizika) – Wikipedija</a></li>
+                <li><a href="https://lt.wikipedia.org/wiki/Galia_(fizika)" target="_blank" rel="noopener">Galia (fizika)
+                        – Wikipedija</a></li>
+                <li><a href="https://www.khanacademy.org/science/physics/work-and-energy" target="_blank"
+                        rel="noopener">Khan Academy: Darbas ir galia (angl.)</a></li>
+            </ul>
+        </div>
+
+        <!-- Čia bus nupieštos simuliacijos -->
+        <div id="simuliacija"></div>
+
+        <div class="bottom-button">
+            <button onclick="window.location.href='index.html';">Grįžti į pradžią</button>
+        </div>
+
+        <footer class="footer">
+            &copy; 2025 Mechaninis darbas ir galia
+        </footer>
+    </div>
+
+    <script>
+        // Jėga (N)
+        let jega;
+        // Atstumas (m)
+        let atstumas;
+        // Laikas (s)
+        let laikas;
+        // Mechaninis darbas (J)
+        let darbas;
+        // Galia (W)
+        let galia;
+        // Viso animacijos judėjimo x koordinatė (pikseliais)
+        let x = 0;
+        // Ar vyksta simuliacija
+        let simuliuojama = false;
+        // Simuliacijos pradžios laikas milisekundėmis
+        let pradziosLaikas = 0;
+        // Objekto (blokelio) plotis ekrane pikseliais
+        let objektoPlotis = 60;
+        // Kiek pikselių atitinka vieną metrą
+        let pikseliaiUzMetra = 100;
+        // p5.js kanvasas
+        let kanvasas;
+
+        // p5.js setup funkcija - vykdoma vieną kartą, kai puslapis įkeliamas
+        function setup() {
+            // Sukuriame kanvasą ir įdedame į div su id 'simuliacija'
+            kanvasas = createCanvas(1100, 250).parent('simuliacija');
+            // Nustatome pradinius kintamuosius ir nupiešiame pradinį vaizdą
+            resetuotiSimuliacija();
+            // Nustatome šriftą tekstui kanvase
+            textFont('sans-serif');
+        }
+
+        // p5.js draw funkcija yra vykdoma 60 kartų per sekundę, kad atnaujintų vaizdą
+        function draw() {
+            // Nubrėžiame baltą foną
+            background(255);
+
+            // Nubrėžiame žemės liniją (grindis)
+            stroke(150);
+            strokeWeight(2);
+            line(0, height - 50, width, height - 50);
+
+            // Nubrėžiame judantį blokelį (raudonas stačiakampis)
+            fill('#e53935');
+            rect(x, height - 90, objektoPlotis, 40);
+
+            // Jei vyksta simuliacija, atnaujiname blokelio poziciją pagal laiką
+            if (simuliuojama) {
+                // Praėjęs laikas sekundėmis nuo simuliacijos pradžios
+                let praėjęLaikas = (millis() - pradziosLaikas) / 1000;
+
+                if (praėjęLaikas <= laikas) {
+                    // Pakeičiame x koordinates pagal praėjusį laiką ir bendrą judėjimo atstumą
+                    x = map(praėjęLaikas, 0, laikas, 50, 50 + atstumas * pikseliaiUzMetra);
+                } else {
+                    // Jei laikas baigėsi, sustabdome simuliaciją
+                    simuliuojama = false;
+                }
+
+                // Jeigu blokelis išeina už kanvaso ribų, stabdome simuliaciją
+                if (x + objektoPlotis > width) {
+                    simuliuojama = false;
+                }
+            }
+        }
+
+        // Funkcija, kuri paleidžia simuliaciją, kai paspaudžiamas mygtukas "Pradėti simuliaciją"
+        function pradetiSimuliacija() {
+            // Nuskaitome reikšmes iš įvesties laukų ir konvertuojame į skaičius
+            jega = parseFloat(document.getElementById('jega').value);
+            atstumas = parseFloat(document.getElementById('atstumas').value);
+            laikas = parseFloat(document.getElementById('laikas').value);
+
+            // Patikriname, ar įvesti skaičiai yra tinkami (ne neigiami ir laikas > 0)
+            if (isNaN(jega) || isNaN(atstumas) || isNaN(laikas) || laikas <= 0 || atstumas < 0 || jega < 0) {
+                document.getElementById('output').innerText = 'Įveskite teisingus skaičius (neigiami netinkami).';
+                return;
+            }
+
+            // Apskaičiuojame mechaninį darbą: darbas = jėga × atstumas
+            darbas = jega * atstumas;
+            // Apskaičiuojame galią: galia = darbas / laikas
+            galia = darbas / laikas;
+
+            // Pradinis blokelio x koordinatės taškas (50 pikselių nuo kairės)
+            x = 50;
+            // Pradedame simuliaciją
+            simuliuojama = true;
+            // Įsimename simuliacijos pradžios laiką (milisekundėmis)
+            pradziosLaikas = millis();
+
+            // Parodome rezultatus puslapio apačioje
+            document.getElementById('output').innerHTML = `
+        <p>Atliktas mechaninis darbas: <strong>${darbas.toFixed(2)} J</strong></p>
+        <p>Galia: <strong>${galia.toFixed(2)} W</strong></p>
+      `;
+        }
+
+        // Funkcija, kuri išvalo simuliaciją ir paruošia ją naujam paleidimui
+        function resetuotiSimuliacija() {
+            // Sustabdo simuliaciją
+            simuliuojama = false;
+            // Grąžina blokelį į pradinę padėtį
+            x = 50;
+            // Išvalo kanvą
+            clear();
+            background(255);
+            // Išvalo rezultatus
+            document.getElementById('output').innerText = '';
+        }
+
+        // Funkcija rodyti arba slėpti fizikos paaiškinimą
+        function perjungtiPasiskaicinima() {
+            const elementas = document.getElementById('paaiskinimas');
+            // Jei šiuo metu rodomas, paslepia, jei paslėptas - rodo
+            elementas.style.display = (elementas.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // Funkcija rodyti arba slėpti nuorodas
+        function perjungtiNuorodas() {
+            const elementas = document.getElementById('nuorodos');
+            // Jei rodomos, paslepia, jei paslėptos - rodo
+            elementas.style.display = (elementas.style.display === 'block') ? 'none' : 'block';
+        }
+    </script>
+</body>
+
+</html>
